@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#15803d">
+    <title>Admin &middot; Techinverse Solutions</title>
+    <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
+    <link rel="shortcut icon" href="assets/favicon.ico" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: { 600: '#16a34a', 700: '#15803d' } } } } };
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; border-radius: .375rem; padding: .5rem 1rem; font-size: .875rem; cursor: pointer; transition: background-color .15s; }
+        .btn-primary { background: #16a34a; color: #fff; } .btn-primary:hover { background: #15803d; }
+        .btn-outline { border: 1px solid #d1d5db; color: #374151; background: #fff; } .btn-outline:hover { background: #f9fafb; }
+        .btn-danger { border: 1px solid #fecaca; color: #b91c1c; background: #fff; } .btn-danger:hover { background: #fef2f2; }
+        .input { width: 100%; border: 1px solid #d1d5db; border-radius: .375rem; padding: .5rem .75rem; font-size: .875rem; background: #fff; }
+        .input:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,.15); }
+        .lbl { display: block; font-size: .75rem; font-weight: 600; color: #374151; margin-bottom: .25rem; text-transform: uppercase; letter-spacing: .02em; }
+        .hide { display: none !important; }
+        .toast { position: fixed; bottom: 1.25rem; right: 1.25rem; background: #111827; color: #fff; padding: .75rem 1.25rem; border-radius: .5rem; box-shadow: 0 10px 25px rgba(0,0,0,.2); z-index: 9999; font-size: .875rem; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all .2s; pointer-events: none; max-width: calc(100vw - 2.5rem); }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.ok { background: #15803d; }
+        .toast.err { background: #b91c1c; }
+        @media (max-width: 767px) {
+            .hide-mobile { display: none !important; }
+            .toast { left: 1rem; right: 1rem; bottom: 1rem; text-align: center; }
+            /* header: keep "View site" on one line */
+            header .flex.items-center.space-x-4 { flex-shrink: 0; }
+            header a[href="products.html"] { white-space: nowrap; }
+            /* keep the table inside the viewport on phones */
+            table { table-layout: fixed; }
+            table th, table td { padding-left: .5rem !important; padding-right: .5rem !important; }
+            table td:first-child { width: 55%; }
+            table td:nth-child(3) { width: 25%; }
+            table td:last-child { width: 20%; }
+            table td:last-child button { display: block; margin: 0 0 .25rem auto; }
+            table td:last-child button:last-child { margin-bottom: 0; }
+            table td:first-child .line-clamp-2 { font-size: .8125rem; }
+        }
+    </style>
+</head>
+<body class="font-[-apple-system,BlinkMacSystemFont,'Segoe UI'] min-h-screen bg-gray-100">
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ============ LOGIN SCREEN ============ -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            <div class="flex items-center justify-center mb-6">
+                <img src="images/img-4be183bef0.png" alt="Techinversesolutions Logo" class="w-10 h-10 rounded-md">
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 text-center mb-1">Owner Login</h1>
+            <p class="text-sm text-gray-600 text-center mb-8">Sign in to manage products on Techinverse Solutions</p>
+
+            <form id="login-form">
+                <label for="admin-password" class="lbl">Password</label>
+                <input id="admin-password" type="password" required autocomplete="current-password"
+                    class="input mb-6" placeholder="Enter owner password">
+                <button type="submit" class="btn btn-primary w-full">Sign in to Admin</button>
+                <p class="text-xs text-gray-400 mt-4 text-center">
+                    Demo password: <code class="bg-gray-100 px-1.5 py-0.5 rounded">admin123</code>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="dashboard" class="hide">
+        <!-- Header (same language as the site) -->
+        <header class="w-full bg-gray-200 px-4 md:px-6 py-4 sticky top-0 z-50 shadow-sm" role="banner">
+            <div class="flex justify-between items-center w-full max-w-7xl mx-auto">
+                <a href="index.html" class="flex items-center">
+                    <img src="images/img-4be183bef0.png" alt="Techinversesolutions Logo" class="w-8 h-8 rounded-md">
+                    <div class="ms-1 flex-1 text-start text-lg">
+                        <span class="mb-0.5 truncate leading-tight font-semibold">Techinverse Solutions</span>
+                        <span class="block text-xs text-green-700 font-semibold">Admin</span>
+                    </div>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="products.html" target="_blank" class="text-sm font-medium text-gray-600 hover:text-green-700">View site</a>
+                    <button id="logout-btn" type="button" class="text-sm font-medium text-red-700 hover:text-red-900 cursor-pointer">Log out</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 md:px-6 py-6">
+
+            <!-- Heading + Add button -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Products</h1>
+                    <p id="product-count" class="text-sm text-gray-600 mt-1"></p>
+                </div>
+                <button id="add-btn" type="button" class="btn btn-primary">+ Add Product</button>
+            </div>
+
+            <!-- Search -->
+            <div class="mb-6">
+                <label for="search-input" class="lbl">Search products</label>
+                <input id="search-input" type="search" placeholder="Search by name, category or price..."
+                    class="input max-w-md" autocomplete="off">
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200 bg-gray-50">
+                                <th class="px-4 py-3 font-semibold">Product</th>
+                                <th class="px-4 py-3 font-semibold hide-mobile">Category</th>
+                                <th class="px-4 py-3 font-semibold">Price</th>
+                                <th class="px-4 py-3 font-semibold hide-mobile">Stock</th>
+                                <th class="px-4 py-3 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="hide py-16 text-center">
+                    <p class="text-gray-500 font-medium">No products found.</p>
+                    <p class="text-gray-400 text-sm mt-1">Try a different search, or add a new product.</p>
+                </div>
+            </div>
+
+            <!-- Add / Edit form -->
+            <div id="edit-panel" class="hide mt-10">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8 max-w-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 id="edit-title" class="text-xl font-bold text-gray-900">Add Product</h2>
+                        <button id="edit-cancel" type="button" class="text-sm text-gray-500 hover:text-gray-800 cursor-pointer">Cancel</button>
+                    </div>
+
+                    <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <input type="hidden" id="f-id" name="id">
+
+                        <div class="md:col-span-2">
+                            <label for="f-name" class="lbl">Product name *</label>
+                            <input id="f-name" name="name" type="text" required maxlength="140" class="input" placeholder="e.g. Dell Latitude 5520 Intel Core i5 11th gen">
+                        </div>
+
+                        <div>
+                            <label for="f-category" class="lbl">Category *</label>
+                            <input id="f-category" name="category" type="text" required list="category-list" class="input" placeholder="e.g. Laptops">
+                            <datalist id="category-list">
+                                <option value="Laptops"></option>
+                                <option value="iPAD"></option>
+                                <option value="Accessories"></option>
+                                <option value="Phones"></option>
+                            </datalist>
+                        </div>
+
+                        <div>
+                            <label for="f-price" class="lbl">Price (NGN) *</label>
+                            <input id="f-price" name="price" type="number" required min="0" step="0.01" class="input" placeholder="e.g. 450000">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="f-short" class="lbl">Short description</label>
+                            <textarea id="f-short" name="short" rows="2" maxlength="400" class="input" placeholder="One-line summary shown under the product"></textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="f-full" class="lbl">Full description</label>
+                            <textarea id="f-full" name="full" rows="4" maxlength="3000" class="input" placeholder="Detailed description for the product detail page"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="f-stock" class="lbl">Stock status *</label>
+                            <select id="f-stock" name="stock" class="input">
+                                <option value="in">In Stock</option>
+                                <option value="low">Low Stock</option>
+                                <option value="out">Out of Stock</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="f-qty" class="lbl">Quantity available</label>
+                            <input id="f-qty" name="qty" type="number" min="0" step="1" class="input" placeholder="e.g. 10">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="f-img" class="lbl">Product image upload</label>
+                            <input id="f-img" name="img" type="file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
+                            <div id="img-preview-wrap" class="hide mt-3">
+                                <img id="img-preview" alt="Product image preview" class="w-32 h-32 object-cover rounded-lg border border-gray-200">
+                                <button type="button" id="img-clear" class="mt-2 text-xs text-red-700 hover:text-red-900 cursor-pointer">Remove image</button>
+                            </div>
+                            <p id="img-hint" class="text-xs text-gray-400 mt-1">Images are stored in your browser (demo storage) so the preview works with no backend.</p>
+                        </div>
+
+                        <div class="md:col-span-2 flex items-center gap-3 pt-2">
+                            <button type="submit" class="btn btn-primary">Save Product</button>
+                            <span id="save-status" class="text-sm text-gray-500"></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirm delete dialog -->
+    <div id="confirm-overlay" class="hide fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4" style="backdrop-filter: blur(2px);">
+        <div class="bg-white rounded-lg shadow-lg border border-gray-200 w-full max-w-sm p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Delete this product?</h3>
+            <p id="confirm-text" class="text-sm text-gray-600 mb-6">This cannot be undone.</p>
+            <div class="flex justify-end gap-3">
+                <button id="confirm-cancel" type="button" class="btn btn-outline">Cancel</button>
+                <button id="confirm-yes" type="button" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/admin-store.js"></script>
+    <script>
+        (function () {
+            'use strict';
+            var SESSION_KEY = 'tis_admin_session';
+            var PASSWORD = 'admin123';
+
+            // ---- Auth ----
+            function isAuthed() { try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) { return false; } }
+            function setAuthed(v) { try { v ? sessionStorage.setItem(SESSION_KEY, '1') : sessionStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+            var $ = function (id) { return document.getElementById(id); };
+            var loginScreen = $('login-screen'), dashboard = $('dashboard');
+
+            function showToast(msg, type) {
+                var t = $('toast');
+                t.textContent = msg;
+                t.className = 'toast show' + (type === 'ok' ? ' ok' : type === 'err' ? ' err' : '');
+                clearTimeout(t._h);
+                t._h = setTimeout(function () { t.className = 'toast'; }, 2600);
+            }
+
+            function refreshAuth() {
+                var ok = isAuthed();
+                loginScreen.classList.toggle('hide', ok);
+                dashboard.classList.toggle('hide', !ok);
+                if (ok) renderTable();
+            }
+
+            // ---- Login ----
+            $('login-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                if ($('admin-password').value === PASSWORD) {
+                    setAuthed(true);
+                    $('admin-password').value = '';
+                    refreshAuth();
+                    showToast('Welcome back, owner', 'ok');
+                } else {
+                    showToast('Incorrect password', 'err');
+                }
+            });
+            $('logout-btn').addEventListener('click', function () { setAuthed(false); refreshAuth(); showToast('Logged out'); });
+
+            // ---- Table ----
+            var currentSearch = '';
+
+            function stockBadge(p) {
+                if (p.stock === 'out') return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Out of stock</span>';
+                if (p.stock === 'low') return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Low stock (' + (p.qty || 0) + ')</span>';
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">In stock (' + (p.qty || 0) + ')</span>';
+            }
+
+            function renderTable() {
+                var list = AdminStore.all();
+                var q = currentSearch.trim().toLowerCase();
+                var rows = list.filter(function (p) {
+                    if (!q) return true;
+                    return (p.name || '').toLowerCase().indexOf(q) >= 0
+                        || (p.category || '').toLowerCase().indexOf(q) >= 0
+                        || AdminStore.fmtNaira(p.price).toLowerCase().indexOf(q) >= 0;
+                });
+                $('product-count').textContent = list.length + ' product' + (list.length === 1 ? '' : 's') + ' in catalog';
+                var tbody = $('table-body');
+                tbody.innerHTML = '';
+                $('empty-state').classList.toggle('hide', rows.length > 0);
+                rows.forEach(function (p) {
+                    var tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    var imgHtml = p.img
+                        ? '<img src="' + p.img + '" alt="" class="w-12 h-12 rounded-md object-cover border border-gray-200">'
+                        : '<div class="w-12 h-12 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 text-xs">—</div>';
+                    tr.innerHTML =
+                        '<td class="px-4 py-3"><div class="flex items-center gap-3">' + imgHtml +
+                        '<span class="font-medium text-gray-900 line-clamp-2">' + escapeHtml(p.name) + '</span></div></td>' +
+                        '<td class="px-4 py-3 hide-mobile"><span class="text-xs font-semibold text-gray-600 uppercase tracking-wide">' + escapeHtml(p.category || '') + '</span></td>' +
+                        '<td class="px-4 py-3 font-semibold text-green-600 whitespace-nowrap">' + AdminStore.fmtNaira(p.price) + '</td>' +
+                        '<td class="px-4 py-3 hide-mobile">' + stockBadge(p) + '</td>' +
+                        '<td class="px-4 py-3 text-right whitespace-nowrap">' +
+                        '<button data-act="edit" data-id="' + p.id + '" class="text-sm font-medium text-green-700 hover:text-green-900 mr-3 cursor-pointer">Edit</button>' +
+                        '<button data-act="del" data-id="' + p.id + '" class="text-sm font-medium text-red-700 hover:text-red-900 cursor-pointer">Delete</button>' +
+                        '</td>';
+                    tbody.appendChild(tr);
+                });
+                tbody.querySelectorAll('button[data-act]').forEach(function (b) {
+                    b.addEventListener('click', function () {
+                        if (b.dataset.act === 'edit') openEdit(b.dataset.id);
+                        else askDelete(b.dataset.id);
+                    });
+                });
+            }
+
+            function escapeHtml(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            $('search-input').addEventListener('input', function () { currentSearch = this.value; renderTable(); });
+
+            // ---- Add / Edit ----
+            var pendingDeleteId = null;
+
+            $('add-btn').addEventListener('click', function () { openEdit(null); });
+            $('edit-cancel').addEventListener('click', function () { closeEdit(); });
+
+            function openEdit(id) {
+                $('edit-title').textContent = id ? 'Edit Product' : 'Add Product';
+                $('product-form').reset();
+                $('f-id').value = id || '';
+                $('img-preview-wrap').classList.add('hide');
+                $('img-preview').removeAttribute('src');
+                $('f-img').value = '';
+                if (id) {
+                    var p = AdminStore.get(id);
+                    if (!p) return;
+                    $('f-name').value = p.name || '';
+                    $('f-category').value = p.category || '';
+                    $('f-price').value = p.price != null ? p.price : '';
+                    $('f-short').value = p.short || '';
+                    $('f-full').value = p.full || '';
+                    $('f-stock').value = p.stock || 'in';
+                    $('f-qty').value = p.qty != null ? p.qty : '';
+                    if (p.img) { $('img-preview').src = p.img; $('img-preview-wrap').classList.remove('hide'); }
+                }
+                $('edit-panel').classList.remove('hide');
+                $('edit-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                $('f-name').focus();
+            }
+
+            function closeEdit() {
+                $('edit-panel').classList.add('hide');
+                $('save-status').textContent = '';
+            }
+
+            // Image preview (FileReader only — no upload happens)
+            $('f-img').addEventListener('change', function () {
+                var file = this.files && this.files[0];
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2 MB', 'err'); this.value = ''; return; }
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('img-preview').src = e.target.result;
+                    $('img-preview-wrap').classList.remove('hide');
+                };
+                reader.readAsDataURL(file);
+            });
+            $('img-clear').addEventListener('click', function () {
+                $('f-img').value = '';
+                $('img-preview').removeAttribute('src');
+                $('img-preview-wrap').classList.add('hide');
+            });
+
+            $('product-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var id = $('f-id').value || AdminStore.nextId();
+                var price = parseFloat($('f-price').value);
+                if (isNaN(price) || price < 0) { showToast('Enter a valid price', 'err'); return; }
+                var img = $('img-preview').getAttribute('src') || '';
+                var isNew = !$('f-id').value;
+                var record = {
+                    id: id,
+                    name: $('f-name').value.trim(),
+                    category: $('f-category').value.trim() || 'Uncategorized',
+                    price: price,
+                    short: $('f-short').value.trim(),
+                    full: $('f-full').value.trim(),
+                    stock: $('f-stock').value,
+                    qty: parseInt($('f-qty').value, 10) || 0,
+                    img: img,
+                    href: isNew ? 'product.html?p=' + id : (AdminStore.get(id) || {}).href
+                };
+                AdminStore.upsert(record);
+                renderTable();
+                closeEdit();
+                showToast(isNew ? 'Product added to the site' : 'Product updated', 'ok');
+            });
+
+            // ---- Delete ----
+            function askDelete(id) {
+                var p = AdminStore.get(id);
+                pendingDeleteId = id;
+                $('confirm-text').textContent = 'Delete "' + (p ? p.name : 'this product') + '"? This cannot be undone.';
+                $('confirm-overlay').classList.remove('hide');
+            }
+            $('confirm-cancel').addEventListener('click', function () { $('confirm-overlay').classList.add('hide'); pendingDeleteId = null; });
+            $('confirm-yes').addEventListener('click', function () {
+                if (pendingDeleteId) {
+                    AdminStore.remove(pendingDeleteId);
+                    renderTable();
+                    showToast('Product deleted', 'ok');
+                }
+                $('confirm-overlay').classList.add('hide');
+                pendingDeleteId = null;
+            });
+
+            refreshAuth();
+        })();
+    </script>
+</body>
+</html>
