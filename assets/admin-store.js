@@ -95,6 +95,10 @@
         return 'p' + String(max + 1).padStart(2, '0');
     }
 
+    // Expose the built-in catalog so assets/tis-backend.js can use it as the
+    // offline fallback and as the seed for the shared database.
+    global.__TIS_SEED__ = SEED;
+
     global.AdminStore = {
         KEY: KEY,
         all: all,

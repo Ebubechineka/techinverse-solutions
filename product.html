@@ -159,75 +159,84 @@
             <p class="text-sm mb-4 max-w-2xl">Experience powerful laptops engineered for speed, creativity, and precision, built to handle gaming, design, and professional workloads with effortless performance</p>
             <p class="text-sm mb-1">support@techinversesolutions.com</p>
             <p class="text-sm mb-6">1-800-TECH-INV</p>
-            <p class="text-sm text-gray-400">&copy; 2025 Techinverse Solutions. All rights reserved.</p>
+            <p class="text-sm text-gray-400">&copy; 2025 Techinverse Solutions. All rights reserved. <a href="admin.html" class="text-xs text-gray-500 hover:text-green-600 ml-2" title="Site owner login">Admin</a></p>
         </div>
     </footer>
 
+    <script src="assets/tis-config.js"></script>
     <script src="assets/admin-store.js"></script>
+    <script src="assets/tis-backend.js"></script>
     <script>
         (function () {
             'use strict';
             var params = new URLSearchParams(location.search);
             var id = params.get('p');
-            var p = id ? AdminStore.get(id) : null;
 
             function show(el) { el.classList.remove('hide'); }
 
-            if (!p) {
+            function render(p) {
+                if (!p) {
+                    show(document.getElementById('not-found'));
+                    return;
+                }
+
+                document.title = p.name + ' - Premium Tech Products - Techinverse Solutions';
+                document.getElementById('crumb-name').textContent = p.name;
+                document.getElementById('p-name').textContent = p.name;
+                document.getElementById('p-category').textContent = p.category || 'Products';
+                document.getElementById('p-model').textContent = 'Model: ' + TIS.slugify(p.name);
+                document.getElementById('p-price').textContent = TIS.fmtNaira(p.price);
+
+                var img = document.getElementById('p-img');
+                img.src = p.img || 'images/img-4be183bef0.png';
+                img.alt = p.name;
+
+                var stockEl = document.getElementById('p-stock');
+                var dot = document.getElementById('p-dot');
+                var ship = document.getElementById('p-ship');
+                if (p.stock === 'out') {
+                    stockEl.textContent = 'Out of Stock';
+                    dot.className = 'w-3 h-3 bg-red-500 rounded-full mr-2';
+                    ship.textContent = 'Currently unavailable';
+                } else if (p.stock === 'low') {
+                    stockEl.textContent = 'Low Stock (' + (p.qty || 0) + ' available)';
+                    dot.className = 'w-3 h-3 bg-amber-500 rounded-full mr-2';
+                } else {
+                    stockEl.textContent = 'In Stock (' + (p.qty || 0) + ' available)';
+                }
+
+                if (p.short) {
+                    document.getElementById('p-short').textContent = p.short;
+                } else {
+                    document.getElementById('p-short-wrap').classList.add('hide');
+                }
+
+                if (p.full) {
+                    // Preserve paragraph breaks from the textarea
+                    var parts = String(p.full).split(/\n{2,}/);
+                    document.getElementById('p-full').innerHTML = parts.map(function (t) {
+                        return '<p>' + t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + '</p>';
+                    }).join('');
+                } else {
+                    document.getElementById('p-full-wrap').classList.add('hide');
+                }
+
+                document.getElementById('add-cart').addEventListener('click', function () {
+                    var b = this;
+                    var old = b.textContent;
+                    b.textContent = 'Added to cart';
+                    b.disabled = true;
+                    setTimeout(function () { b.textContent = old; b.disabled = false; }, 1600);
+                });
+
+                show(document.getElementById('product-wrap'));
+            }
+
+            if (!id) { show(document.getElementById('not-found')); return; }
+
+            TIS.getProduct(id).then(render).catch(function () {
                 show(document.getElementById('not-found'));
-                return;
-            }
-
-            document.title = p.name + ' - Premium Tech Products - Techinverse Solutions';
-            document.getElementById('crumb-name').textContent = p.name;
-            document.getElementById('p-name').textContent = p.name;
-            document.getElementById('p-category').textContent = p.category || 'Products';
-            document.getElementById('p-model').textContent = 'Model: ' + AdminStore.slugify(p.name);
-            document.getElementById('p-price').textContent = AdminStore.fmtNaira(p.price);
-
-            var img = document.getElementById('p-img');
-            img.src = p.img || 'images/img-4be183bef0.png';
-            img.alt = p.name;
-
-            var stockEl = document.getElementById('p-stock');
-            var dot = document.getElementById('p-dot');
-            var ship = document.getElementById('p-ship');
-            if (p.stock === 'out') {
-                stockEl.textContent = 'Out of Stock';
-                dot.className = 'w-3 h-3 bg-red-500 rounded-full mr-2';
-                ship.textContent = 'Currently unavailable';
-            } else if (p.stock === 'low') {
-                stockEl.textContent = 'Low Stock (' + (p.qty || 0) + ' available)';
-                dot.className = 'w-3 h-3 bg-amber-500 rounded-full mr-2';
-            } else {
-                stockEl.textContent = 'In Stock (' + (p.qty || 0) + ' available)';
-            }
-
-            if (p.short) {
-                document.getElementById('p-short').textContent = p.short;
-            } else {
-                document.getElementById('p-short-wrap').classList.add('hide');
-            }
-
-            if (p.full) {
-                // Preserve paragraph breaks from the textarea
-                var parts = String(p.full).split(/\n{2,}/);
-                document.getElementById('p-full').innerHTML = parts.map(function (t) {
-                    return '<p>' + t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + '</p>';
-                }).join('');
-            } else {
-                document.getElementById('p-full-wrap').classList.add('hide');
-            }
-
-            document.getElementById('add-cart').addEventListener('click', function () {
-                var b = this;
-                var old = b.textContent;
-                b.textContent = 'Added to cart';
-                b.disabled = true;
-                setTimeout(function () { b.textContent = old; b.disabled = false; }, 1600);
             });
-
-            show(document.getElementById('product-wrap'));
         })();
     </script>
 </body>
